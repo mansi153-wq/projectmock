@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AdminDashboard from './pages/AdminDashboard';
+import CreateExam from './pages/CreateExam';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -10,8 +13,24 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* placeholders — real pages come in Phase 5 and Phase 9 */}
-        <Route path="/admin/dashboard" element={<h2>Admin Dashboard (coming in Phase 5)</h2>} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/create-exam"
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <CreateExam />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* placeholder — real page comes in Phase 9 */}
         <Route path="/student/dashboard" element={<h2>Student Dashboard (coming in Phase 9)</h2>} />
       </Routes>
     </BrowserRouter>
