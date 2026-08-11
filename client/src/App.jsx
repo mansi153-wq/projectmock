@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import CreateExam from './pages/CreateExam';
+import GenerateQuestions from './pages/GenerateQuestions';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -26,6 +27,14 @@ function App() {
           element={
             <ProtectedRoute allowedRole="admin">
               <CreateExam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/exam/:examId/generate"
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <GenerateQuestions />
             </ProtectedRoute>
           }
         />

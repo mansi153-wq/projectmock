@@ -51,6 +51,12 @@ const CreateExam = () => {
           <p style={{ color: 'green' }}>Exam created successfully.</p>
           <p><strong>Exam Code:</strong> {success.exam_code}</p>
           <p><strong>Total Marks:</strong> {success.total_marks}</p>
+          <p><strong>Status:</strong> {success.status}</p>
+          <br />
+          <button onClick={() => navigate(`/admin/exam/${success.id}/generate`)}>
+            Generate Questions with AI
+          </button>
+          &nbsp;&nbsp;
           <button onClick={() => navigate('/admin/dashboard')}>Go to Dashboard</button>
         </div>
       ) : (
