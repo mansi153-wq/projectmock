@@ -45,4 +45,45 @@ const generateQuestions = async (examSettings) => {
   return JSON.parse(rawText);
 };
 
-module.exports = { generateQuestions };
+const buildFeedbackPrompt = ({ subject, topic, difficulty, totalQuestions, answered, correct, incorrect, score, totalMarks, percentage }) => {
+  return `You are an educational feedback expert.
+
+A student just completed an online MCQ examination with the following performance:
+
+Subject: ${subject}
+Topic: ${topic}
+Difficulty: ${difficulty}
+Total Questions: ${totalQuestions}
+Questions Answered: ${answered}
+Correct Answers: ${correct}
+Incorrect Answers: ${incorrect}
+Score: ${score} / ${totalMarks}
+Percentage: ${percentage}%
+
+Generate personalized, constructive academic feedback for this student.
+
+Return ONLY a JSON object in this exact format, with no extra text:
+
+{
+  "overallFeedback": "2-3 sentence overall performance summary",
+  "strengths": ["strength 1", "strength 2"],
+  "weaknesses": ["weakness 1", "weakness 2"],
+  "recommendations": ["recommendation 1", "recommendation 2", "recommendation 3"]
+}`;
+};
+
+const generateFeedback = async (performanceData) => {
+  const prompt = buildFeedbackPrompt(performanceData);
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-flash-latest',
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+    },
+  });
+
+  return JSON.parse(response.text);
+};
+
+module.exports = { generateQuestions, generateFeedback };

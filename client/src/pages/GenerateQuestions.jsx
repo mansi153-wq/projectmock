@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import AdminLayout from '../components/admin/AdminLayout';
 import api from '../services/api';
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D'];
+const OPTION_KEYS = ['option_a', 'option_b', 'option_c', 'option_d'];
 
 const GenerateQuestions = () => {
   const { examId } = useParams();
@@ -13,48 +17,34 @@ const GenerateQuestions = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Fetch exam details on mount
   useEffect(() => {
-    const fetchExam = async () => {
+    const load = async () => {
       try {
         const res = await api.get(`/exams/${examId}`);
         setExam(res.data.exam);
-        // If already ready, also load existing questions
-        if (res.data.exam.status === 'ready') {
+        if (['ready', 'scheduled', 'active', 'completed'].includes(res.data.exam.status)) {
           const qRes = await api.get(`/exams/${examId}/questions-admin`);
           setQuestions(qRes.data.questions);
         }
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load exam details');
-      } finally {
-        setLoadingExam(false);
-      }
+        setError(err.response?.data?.message || 'Failed to load exam');
+      } finally { setLoadingExam(false); }
     };
-    fetchExam();
+    load();
   }, [examId]);
 
   const handleGenerate = async () => {
-    setError('');
-    setSuccessMsg('');
-    setGenerating(true);
-    setQuestions([]);
-
+    setError(''); setSuccessMsg(''); setGenerating(true); setQuestions([]);
     try {
       const res = await api.post(`/exams/${examId}/generate`);
       setSuccessMsg(res.data.message);
-
-      // Fetch the generated questions for preview
       const qRes = await api.get(`/exams/${examId}/questions-admin`);
       setQuestions(qRes.data.questions);
-
-      // Refresh exam status
-      const examRes = await api.get(`/exams/${examId}`);
-      setExam(examRes.data.exam);
+      const eRes = await api.get(`/exams/${examId}`);
+      setExam(eRes.data.exam);
     } catch (err) {
       setError(err.response?.data?.message || 'Generation failed. Please try again.');
-    } finally {
-      setGenerating(false);
-    }
+    } finally { setGenerating(false); }
   };
 
   const handlePublish = async () => {
@@ -67,83 +57,117 @@ const GenerateQuestions = () => {
     }
   };
 
-  if (loadingExam) return <p>Loading exam...</p>;
-  if (!exam && !loadingExam) return <p style={{ color: 'red' }}>{error || 'Exam not found'}</p>;
+  if (loadingExam) return (
+    <AdminLayout pageName="Generate Questions">
+      <div className="a-loading"><div className="a-spinner" /><span>Loading exam...</span></div>
+    </AdminLayout>
+  );
+
+  const isPublished = ['scheduled', 'active', 'completed'].includes(exam?.status);
 
   return (
-    <div>
-      <Link to="/admin/dashboard">← Back to Dashboard</Link>
-      <h2>Generate Questions — {exam?.title}</h2>
-
-      {exam && (
-        <div style={{ background: '#f5f5f5', padding: '12px', marginBottom: '16px', borderRadius: '6px' }}>
-          <p><strong>Subject:</strong> {exam.subject} &nbsp;|&nbsp; <strong>Topic:</strong> {exam.topic}</p>
-          <p><strong>Difficulty:</strong> {exam.difficulty} &nbsp;|&nbsp; <strong>Questions:</strong> {exam.question_count} &nbsp;|&nbsp; <strong>Marks each:</strong> {exam.marks_per_question}</p>
-          <p><strong>Status:</strong> <span style={{ textTransform: 'capitalize' }}>{exam.status}</span></p>
+    <AdminLayout pageName="Generate Questions">
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div className="ap-header">
+          <div>
+            <div className="ap-title">✨ Generate Questions</div>
+            <div className="ap-subtitle">{exam?.title}</div>
+          </div>
+          <button className="abtn abtn--ghost" onClick={() => navigate('/admin/dashboard')}>
+            ← Dashboard
+          </button>
         </div>
-      )}
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {successMsg && <p style={{ color: 'green' }}>{successMsg}</p>}
-
-      <button onClick={handleGenerate} disabled={generating}>
-        {generating
-          ? '⏳ Generating with AI... (this may take 10–30 seconds)'
-          : questions.length > 0
-          ? '🔄 Regenerate Questions'
-          : '✨ Generate Questions with AI'}
-      </button>
-
-      {questions.length > 0 && (
-        <div style={{ marginTop: '24px' }}>
-          <h3>Preview — {questions.length} Questions Generated</h3>
-          <p style={{ color: '#666' }}>Review the questions below. If you are satisfied, click "Publish Exam".</p>
-
-          {questions.map((q, i) => (
-            <div
-              key={q.id}
-              style={{
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                padding: '16px',
-                marginBottom: '16px',
-                background: '#fff',
-              }}
-            >
-              <p><strong>Q{i + 1}.</strong> {q.question_text}</p>
-              <ul style={{ listStyle: 'none', paddingLeft: '8px' }}>
-                <li style={{ color: q.correct_answer === q.option_a ? 'green' : 'inherit' }}>
-                  A) {q.option_a} {q.correct_answer === q.option_a && '✓'}
-                </li>
-                <li style={{ color: q.correct_answer === q.option_b ? 'green' : 'inherit' }}>
-                  B) {q.option_b} {q.correct_answer === q.option_b && '✓'}
-                </li>
-                <li style={{ color: q.correct_answer === q.option_c ? 'green' : 'inherit' }}>
-                  C) {q.option_c} {q.correct_answer === q.option_c && '✓'}
-                </li>
-                <li style={{ color: q.correct_answer === q.option_d ? 'green' : 'inherit' }}>
-                  D) {q.option_d} {q.correct_answer === q.option_d && '✓'}
-                </li>
-              </ul>
-              <p style={{ color: '#555', fontSize: '0.9em' }}>
-                <strong>Explanation:</strong> {q.explanation}
-              </p>
+        {/* Exam info */}
+        {exam && (
+          <div className="aei-box">
+            <div className="aei-grid">
+              <div className="aei-item"><div className="aei-label">Subject</div><div className="aei-value">{exam.subject}</div></div>
+              <div className="aei-item"><div className="aei-label">Topic</div><div className="aei-value">{exam.topic}</div></div>
+              <div className="aei-item"><div className="aei-label">Difficulty</div><div className="aei-value">{exam.difficulty}</div></div>
+              <div className="aei-item"><div className="aei-label">Questions</div><div className="aei-value">{exam.question_count}</div></div>
+              <div className="aei-item"><div className="aei-label">Marks each</div><div className="aei-value">{exam.marks_per_question}</div></div>
+              <div className="aei-item">
+                <div className="aei-label">Status</div>
+                <div className="aei-value"><span className={`badge badge--${exam.status}`}>{exam.status}</span></div>
+              </div>
             </div>
-          ))}
+          </div>
+        )}
 
-          <button
-            onClick={handlePublish}
-            style={{ background: '#28a745', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '1em' }}
-          >
-            ✅ Publish Exam
-          </button>
-          &nbsp;&nbsp;
-          <button onClick={handleGenerate} disabled={generating}>
-            🔄 Regenerate
-          </button>
-        </div>
-      )}
-    </div>
+        {error   && <div className="a-alert a-alert--error">⚠️ {error}</div>}
+        {successMsg && <div className="a-alert a-alert--success">✅ {successMsg}</div>}
+
+        {/* Generate button */}
+        {!isPublished && (
+          <div style={{ marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <button className="abtn abtn--purple abtn--lg" onClick={handleGenerate} disabled={generating}>
+              {generating ? '⏳ Generating...' : questions.length > 0 ? '🔄 Regenerate Questions' : '✨ Generate Questions with AI'}
+            </button>
+            {questions.length > 0 && (
+              <button className="abtn abtn--success abtn--lg" onClick={handlePublish}>
+                🚀 Publish Exam
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Generating animation */}
+        {generating && (
+          <div className="a-generating" style={{ marginBottom: '24px' }}>
+            <div className="a-generating-dots">
+              <span /><span /><span />
+            </div>
+            <div style={{ marginTop: '16px', fontWeight: 600, color: '#1d4ed8' }}>
+              AI is generating {exam?.question_count} questions...
+            </div>
+            <div style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '6px' }}>
+              This usually takes 10–30 seconds
+            </div>
+          </div>
+        )}
+
+        {/* Questions preview */}
+        {questions.length > 0 && (
+          <>
+            <div className="a-card-header" style={{ background: '#fff', borderRadius: '12px 12px 0 0', padding: '16px 20px', border: '1px solid #e2e8f0', borderBottom: 'none' }}>
+              <span className="a-card-title">📋 {questions.length} Questions Preview</span>
+              {isPublished && <span className={`badge badge--${exam?.status}`}>{exam?.status}</span>}
+            </div>
+
+            {questions.map((q, i) => (
+              <div key={q.id} className="aq-card" style={{ borderRadius: i === questions.length - 1 ? '0 0 12px 12px' : '0', borderTop: 'none' }}>
+                <div className="aq-number">Question {i + 1} of {questions.length}</div>
+                <div className="aq-text">{q.question_text}</div>
+                <div className="aq-options">
+                  {OPTION_KEYS.map((key, idx) => (
+                    <div key={key} className={`aq-option ${q.correct_answer === q[key] ? 'aq-option--correct' : ''}`}>
+                      <span className="aq-option-label">{OPTION_LABELS[idx]}</span>
+                      {q[key]}
+                      {q.correct_answer === q[key] && <span style={{ marginLeft: 'auto' }}>✓</span>}
+                    </div>
+                  ))}
+                </div>
+                <div className="aq-explanation">
+                  💡 <strong>Explanation:</strong> {q.explanation}
+                </div>
+              </div>
+            ))}
+
+            {!isPublished && (
+              <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+                <button className="abtn abtn--success abtn--lg" onClick={handlePublish}>
+                  🚀 Publish Exam
+                </button>
+                <button className="abtn abtn--ghost" onClick={handleGenerate} disabled={generating}>
+                  🔄 Regenerate
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </AdminLayout>
   );
 };
 
