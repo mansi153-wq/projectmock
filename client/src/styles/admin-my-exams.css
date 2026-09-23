@@ -1,0 +1,222 @@
+/* ── My Exams Page ──────────────────────────────────── */
+
+.my-exams-page { max-width: 1200px; }
+
+/* Toolbar */
+.my-exams-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.my-exams-toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.my-exams-search-wrap {
+  position: relative;
+}
+.my-exams-search {
+  height: 40px;
+  padding: 0 14px 0 38px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background: #fff;
+  outline: none;
+  width: 240px;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.my-exams-search:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.my-exams-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.my-exams-filter-select {
+  height: 40px;
+  padding: 0 32px 0 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.18s;
+}
+.my-exams-filter-select:focus { border-color: #3b82f6; }
+
+.my-exams-count {
+  font-size: 0.82rem;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 6px 14px;
+  border-radius: 6px;
+}
+
+/* Table */
+.my-exams-table-wrap {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e8edf5;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.my-exams-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.my-exams-table thead tr {
+  background: #f8fafc;
+  border-bottom: 1px solid #e8edf5;
+}
+.my-exams-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  white-space: nowrap;
+}
+.my-exams-table td {
+  padding: 14px 16px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.my-exams-table tr:last-child td { border-bottom: none; }
+.my-exams-table tbody tr { transition: background 0.15s; }
+.my-exams-table tbody tr:hover td { background: #f8faff; }
+
+.exam-title-cell .title { font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+.exam-title-cell .meta  { font-size: 0.75rem; color: #64748b; }
+
+.exam-code-pill {
+  display: inline-block;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #bfdbfe;
+  transition: all 0.15s;
+}
+.exam-code-pill:hover {
+  background: #dbeafe;
+  transform: scale(1.02);
+}
+
+/* Status badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.status-pill::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.status-pill.draft     { background: #f1f5f9; color: #64748b; }
+.status-pill.generating{ background: #fef9c3; color: #92400e; }
+.status-pill.ready     { background: #dbeafe; color: #1d4ed8; }
+.status-pill.scheduled { background: #e0e7ff; color: #4338ca; }
+.status-pill.active    { background: #dcfce7; color: #15803d; }
+.status-pill.completed { background: #f1f5f9; color: #475569; }
+.status-pill.generation_failed { background: #fee2e2; color: #dc2626; }
+
+/* Active pulse */
+.status-pill.active::before {
+  animation: statusPulse 1.5s ease-out infinite;
+}
+@keyframes statusPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+/* Action buttons in table */
+.exam-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.tbl-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.tbl-btn:active { transform: scale(0.95); }
+.tbl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.tbl-btn.primary {
+  background: #eff6ff; color: #2563eb; border-color: #bfdbfe;
+}
+.tbl-btn.primary:hover { background: #dbeafe; }
+
+.tbl-btn.success {
+  background: #f0fdf4; color: #15803d; border-color: #bbf7d0;
+}
+.tbl-btn.success:hover { background: #dcfce7; }
+
+.tbl-btn.warning {
+  background: #fffbeb; color: #d97706; border-color: #fde68a;
+}
+.tbl-btn.warning:hover { background: #fef9c3; }
+
+.tbl-btn.danger {
+  background: #fef2f2; color: #dc2626; border-color: #fecaca;
+}
+.tbl-btn.danger:hover { background: #fee2e2; }
+
+.tbl-btn.ghost {
+  background: #f8fafc; color: #475569; border-color: #e2e8f0;
+}
+.tbl-btn.ghost:hover { background: #f1f5f9; color: #1e293b; }
+
+/* Empty state */
+.my-exams-empty {
+  text-align: center;
+  padding: 60px 24px;
+  color: #94a3b8;
+}
+.my-exams-empty-icon  { font-size: 3rem; margin-bottom: 14px; }
+.my-exams-empty-title { font-size: 1rem; font-weight: 600; color: #64748b; margin-bottom: 8px; }
+.my-exams-empty-sub   { font-size: 0.85rem; margin-bottom: 20px; }
+
+@media (max-width: 900px) {
+  .my-exams-table-wrap { overflow-x: auto; }
+  .my-exams-search { width: 180px; }
+}

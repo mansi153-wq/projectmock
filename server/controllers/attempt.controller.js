@@ -1,6 +1,61 @@
 const pool = require('../config/db');
 const { generateFeedback } = require('../services/gemini.service');
 
+// POST /api/attempts/:id/violation — record a tab-switch/window-leave violation
+const recordViolation = async (req, res) => {
+  try {
+    const [attemptRows] = await pool.query('SELECT * FROM exam_attempts WHERE id = ?', [req.params.id]);
+    if (attemptRows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Attempt not found' });
+    }
+    const attempt = attemptRows[0];
+
+    if (attempt.student_id !== req.user.id) {
+      return res.status(403).json({ status: 'error', message: 'Access denied' });
+    }
+
+    // Already submitted — ignore
+    if (attempt.status === 'submitted' || attempt.status === 'auto_submitted') {
+      return res.json({ status: 'already_submitted' });
+    }
+
+    const newCount = (attempt.violation_count || 0) + 1;
+
+    if (newCount === 1) {
+      // First violation — warn only
+      await pool.query(
+        'UPDATE exam_attempts SET violation_count = 1 WHERE id = ?',
+        [attempt.id]
+      );
+      return res.json({
+        status: 'warning',
+        violationCount: 1,
+        message: 'First violation recorded. Student warned.',
+      });
+    }
+
+    // Second violation — auto-submit using existing logic
+    const [examRows] = await pool.query('SELECT * FROM exams WHERE id = ?', [attempt.exam_id]);
+    const exam = examRows[0];
+
+    // Update violation count first
+    await pool.query('UPDATE exam_attempts SET violation_count = 2 WHERE id = ?', [attempt.id]);
+
+    // Reuse existing evaluation logic
+    const result = await evaluateAndSubmit(attempt, exam, 'auto_submitted', req.app.get('io'));
+
+    return res.json({
+      status: 'auto_submitted',
+      violationCount: 2,
+      message: 'Second violation — exam auto-submitted.',
+      result,
+    });
+  } catch (err) {
+    console.error('Violation recording error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to record violation' });
+  }
+};
+
 // POST /api/attempts/join — validate exam code and create/resume attempt
 const joinExam = async (req, res) => {
   try {
@@ -573,4 +628,5 @@ const generateAiFeedback = async (attemptId, studentId, exam, score, answers, co
 module.exports = {
   joinExam, getExamQuestions, saveAnswer, submitAttempt,
   getResult, getFeedback, retryFeedback, getLeaderboard, getLeaderboardByExam,
+  recordViolation,
 };

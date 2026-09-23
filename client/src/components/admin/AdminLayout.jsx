@@ -1,14 +1,34 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import '../../styles/admin.css';
+import { addRipple } from '../../utils/ripple';
+import '../../styles/admin-layout.css';
 
-const NAV = [
-  { path: '/admin/dashboard', icon: '🏠', label: 'Dashboard' },
-  { path: '/admin/create-exam', icon: '➕', label: 'Create Exam' },
+const NAV_ITEMS = [
+  {
+    path: '/admin/dashboard',
+    icon: '🏠',
+    label: 'Dashboard',
+  },
+  {
+    path: '/admin/my-exams',
+    icon: '📋',
+    label: 'My Exams',
+  },
+  {
+    path: '/admin/create-exam',
+    icon: '➕',
+    label: 'Create Exam',
+  },
+  {
+    path: '/admin/live-leaderboard',
+    icon: '🏆',
+    label: 'Live Leaderboard',
+  },
 ];
 
-const AdminLayout = ({ children, pageName }) => {
+
+const AdminLayout = ({ children, pageName, pageSubtitle }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,44 +37,77 @@ const AdminLayout = ({ children, pageName }) => {
   const handleLogout = () => { logout(); navigate('/login'); };
 
   return (
-    <div className="al-wrapper">
-      {open && <div className="al-overlay" onClick={() => setOpen(false)} />}
+    <div className="adm-wrapper">
+      <div className={`adm-overlay ${open ? 'show' : ''}`} onClick={() => setOpen(false)} />
 
-      <aside className={`al-sidebar ${open ? 'al-sidebar--open' : ''}`}>
-        <div className="al-brand">
-          <div className="al-brand-title">🎯 AI Mock Test</div>
-          <div className="al-brand-sub">Admin Panel</div>
+      {/* Sidebar */}
+      <aside className={`adm-sidebar ${open ? 'open' : ''}`}>
+        <div className="adm-sidebar-brand">
+          <div className="adm-sidebar-brand-icon">🎯</div>
+          <div className="adm-sidebar-brand-text">
+            <div className="title">AI Mock Test</div>
+            <div className="sub">Admin Panel</div>
+          </div>
         </div>
-        <nav className="al-nav">
-          {NAV.map(n => (
+
+        <nav className="adm-nav">
+          <div className="adm-nav-section-label">Main</div>
+          {NAV_ITEMS.map(item => (
             <Link
-              key={n.path} to={n.path}
-              className={`al-nav-link ${location.pathname === n.path ? 'al-nav-link--active' : ''}`}
+              key={item.path}
+              to={item.path}
+              className={`adm-nav-link ${location.pathname === item.path ? 'active' : ''}`}
               onClick={() => setOpen(false)}
             >
-              <span className="al-nav-icon">{n.icon}</span>{n.label}
+              <span className="adm-nav-icon">{item.icon}</span>
+              {item.label}
+              {item.badge && (
+                <span className={`adm-nav-badge ${item.badgeColor || ''}`}>{item.badge}</span>
+              )}
             </Link>
           ))}
         </nav>
-        <div className="al-sidebar-footer">
-          <button className="al-logout" onClick={handleLogout}>🚪 Logout</button>
+
+        <div className="adm-sidebar-footer">
+          <div className="adm-user-row">
+            <div className="adm-user-avatar">
+              {user?.name?.charAt(0)?.toUpperCase()}
+            </div>
+            <div className="adm-user-info">
+              <div className="name">{user?.name}</div>
+              <div className="role">Administrator</div>
+            </div>
+          </div>
+          <button className="adm-logout-btn" onClick={handleLogout}>
+            🚪 Sign Out
+          </button>
         </div>
       </aside>
 
-      <div className="al-main">
-        <header className="al-header">
-          <div className="al-header-left">
-            <button className="al-hamburger" onClick={() => setOpen(!open)}>☰</button>
-            <span className="al-page-name">{pageName || 'Dashboard'}</span>
-          </div>
-          <div className="al-header-right">
-            <div className="al-user-chip">
-              <div className="al-user-avatar">{user?.name?.charAt(0)?.toUpperCase()}</div>
-              <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.85rem' }}>{user?.name}</span>
+      {/* Main */}
+      <div className="adm-main">
+        <header className="adm-topbar">
+          <div className="adm-topbar-left">
+            <button className="adm-hamburger" onClick={() => setOpen(!open)}>☰</button>
+            <div>
+              <div className="adm-topbar-title">{pageName || 'Dashboard'}</div>
+              {pageSubtitle && (
+                <div className="adm-topbar-breadcrumb">{pageSubtitle}</div>
+              )}
             </div>
           </div>
+          <div className="adm-topbar-right">
+            <button
+              className="btn btn-primary btn-sm"
+              style={{ fontSize: '0.8rem' }}
+              onClick={() => navigate('/admin/create-exam')}
+            >
+              ➕ New Exam
+            </button>
+          </div>
         </header>
-        <main className="al-content">{children}</main>
+
+        <main className="adm-page-content">{children}</main>
       </div>
     </div>
   );

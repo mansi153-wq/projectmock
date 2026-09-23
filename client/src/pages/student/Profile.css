@@ -1,0 +1,609 @@
+/* =========================================
+   PROFILE PAGE
+   ========================================= */
+
+.profile-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 20px 40px;
+  color: #202c63;
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.profile-title {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 750;
+  letter-spacing: -1px;
+  color: #202c63;
+}
+
+.profile-subtitle {
+  margin: 8px 0 0;
+  font-size: 17px;
+  color: #7380a9;
+  font-weight: 500;
+}
+
+.profile-subtitle span {
+  margin-left: 4px;
+}
+
+.profile-message {
+  text-align: right;
+  color: #8274d8;
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 600;
+  transform: rotate(-3deg);
+  padding-top: 5px;
+}
+
+.profile-message span {
+  font-size: 20px;
+  margin-left: 4px;
+}
+
+/* =========================================
+   MAIN CARD
+   ========================================= */
+
+.profile-card {
+  position: relative;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e4e5fa;
+  border-radius: 24px;
+
+  padding: 55px 34px 70px;
+
+  min-height: 600px;
+
+  box-shadow:
+    0 15px 45px rgba(91, 87, 170, 0.08),
+    0 4px 12px rgba(91, 87, 170, 0.04);
+
+  text-align: center;
+}
+
+/* =========================================
+   DECORATIVE SHAPES
+   ========================================= */
+
+.profile-decoration {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.decoration-top-left {
+  width: 200px;
+  height: 100px;
+  top: -65px;
+  left: -60px;
+
+  background: linear-gradient(
+    135deg,
+    #e8e5ff,
+    #f4f1ff
+  );
+
+  border-radius: 0 0 70% 0;
+}
+
+.decoration-top-right {
+  width: 200px;
+  height: 110px;
+  top: 95px;
+  right: -70px;
+
+  background: linear-gradient(
+    135deg,
+    #fde9f5,
+    #f8eaff
+  );
+
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+.decoration-bottom-left {
+  width: 210px;
+  height: 120px;
+  bottom: -55px;
+  left: -40px;
+
+  background: #f1f0ff;
+  border-radius: 50%;
+}
+
+/* =========================================
+   PAPER PLANE
+   ========================================= */
+
+.paper-plane {
+  position: absolute;
+  top: 55px;
+  right: 45px;
+
+  font-size: 38px;
+  color: #aaa0ed;
+
+  transform: rotate(-25deg);
+
+  opacity: 0.75;
+  z-index: 1;
+}
+
+/* =========================================
+   AVATAR
+   ========================================= */
+
+.profile-avatar-wrapper {
+  position: relative;
+  z-index: 2;
+
+  width: 150px;
+  height: 150px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #f5f3ff;
+
+  border: 7px solid #ebe8ff;
+
+  box-shadow:
+    0 0 0 5px #ffffff,
+    0 0 0 7px #dcd8ff;
+}
+
+.profile-avatar {
+  width: 118px;
+  height: 118px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: linear-gradient(
+    145deg,
+    #9c91e9,
+    #766bd3
+  );
+
+  color: white;
+
+  font-size: 48px;
+  font-weight: 650;
+
+  box-shadow:
+    inset 0 4px 10px rgba(255, 255, 255, 0.25),
+    0 8px 20px rgba(118, 107, 211, 0.22);
+}
+
+/* =========================================
+   USER NAME
+   ========================================= */
+
+.profile-name {
+  position: relative;
+  z-index: 2;
+
+  margin: 0;
+
+  color: #202c63;
+
+  font-size: 31px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
+}
+
+.profile-email {
+  position: relative;
+  z-index: 2;
+
+  margin: 7px 0 14px;
+
+  color: #7a85ab;
+
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* =========================================
+   ROLE BADGE
+   ========================================= */
+
+.profile-role {
+  position: relative;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 18px;
+
+  background: #efedff;
+  color: #7468d2;
+
+  border-radius: 30px;
+
+  font-size: 14px;
+  font-weight: 650;
+
+  box-shadow: 0 4px 12px rgba(117, 105, 210, 0.08);
+}
+
+.role-icon {
+  font-size: 16px;
+}
+
+/* =========================================
+   INFORMATION BOX
+   ========================================= */
+
+.profile-info {
+  position: relative;
+  z-index: 2;
+
+  max-width: 780px;
+  margin: 34px auto 30px;
+
+  background: rgba(255, 255, 255, 0.94);
+
+  border: 1px solid #e3e6f8;
+  border-radius: 17px;
+
+  overflow: hidden;
+
+  text-align: left;
+}
+
+/* =========================================
+   INFORMATION ROW
+   ========================================= */
+
+.profile-info-row {
+  min-height: 100px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 18px 25px;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.profile-info-row + .profile-info-row {
+  border-top: 1px solid #e7e9f7;
+}
+
+.profile-info-row:hover {
+  background: #fafaff;
+}
+
+/* =========================================
+   ICONS
+   ========================================= */
+
+.info-icon {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  font-size: 21px;
+  margin-right: 18px;
+}
+
+.info-blue {
+  background: #e9efff;
+}
+
+.info-pink {
+  background: #fde8f2;
+}
+
+.info-green {
+  background: #e4f7f3;
+}
+
+/* =========================================
+   INFORMATION TEXT
+   ========================================= */
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  flex: 1;
+}
+
+.info-label {
+  color: #8290b6;
+
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.info-value {
+  color: #202c63;
+
+  font-size: 17px;
+  font-weight: 600;
+
+  word-break: break-word;
+}
+
+.info-arrow {
+  color: #8b94b5;
+
+  font-size: 31px;
+  font-weight: 300;
+
+  line-height: 1;
+
+  margin-left: 15px;
+}
+
+/* =========================================
+   LOGOUT BUTTON
+   ========================================= */
+
+.profile-logout {
+  position: relative;
+  z-index: 3;
+
+  min-width: 250px;
+
+  border: none;
+  border-radius: 30px;
+
+  padding: 14px 35px;
+
+  background: linear-gradient(
+    135deg,
+    #ee6571,
+    #e94c60
+  );
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 20px rgba(232, 78, 96, 0.22);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.profile-logout span {
+  margin-right: 9px;
+  font-size: 19px;
+}
+
+.profile-logout:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 25px rgba(232, 78, 96, 0.28);
+}
+
+.profile-logout:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   BOOK DECORATION
+   ========================================= */
+
+.books-decoration {
+  position: absolute;
+
+  right: 30px;
+  bottom: 20px;
+
+  width: 120px;
+  height: 90px;
+
+  z-index: 1;
+
+  transform: rotate(-4deg);
+}
+
+.book {
+  position: absolute;
+
+  width: 100px;
+  height: 17px;
+
+  border-radius: 4px 7px 7px 4px;
+
+  right: 0;
+}
+
+.book-one {
+  bottom: 5px;
+  background: #b5a9f1;
+  transform: rotate(-3deg);
+}
+
+.book-two {
+  bottom: 22px;
+  right: 8px;
+  background: #f3a7c9;
+  transform: rotate(2deg);
+}
+
+.book-three {
+  bottom: 39px;
+  right: 15px;
+  background: #a9c5f5;
+  transform: rotate(-2deg);
+}
+
+.book-heart {
+  position: absolute;
+
+  right: 8px;
+  top: 0;
+
+  color: #8e81df;
+
+  font-size: 21px;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 5px 12px 30px;
+  }
+
+  .profile-header {
+    margin-bottom: 20px;
+  }
+
+  .profile-title {
+    font-size: 30px;
+  }
+
+  .profile-subtitle {
+    font-size: 15px;
+  }
+
+  .profile-message {
+    display: none;
+  }
+
+  .profile-card {
+    padding: 45px 18px 55px;
+    border-radius: 20px;
+  }
+
+  .profile-avatar-wrapper {
+    width: 125px;
+    height: 125px;
+  }
+
+  .profile-avatar {
+    width: 98px;
+    height: 98px;
+
+    font-size: 40px;
+  }
+
+  .profile-name {
+    font-size: 26px;
+  }
+
+  .profile-info {
+    margin-top: 28px;
+  }
+
+  .profile-info-row {
+    min-height: 85px;
+    padding: 14px 15px;
+  }
+
+  .info-icon {
+    width: 42px;
+    height: 42px;
+
+    font-size: 18px;
+    margin-right: 13px;
+  }
+
+  .info-label {
+    font-size: 13px;
+  }
+
+  .info-value {
+    font-size: 15px;
+  }
+
+  .info-arrow {
+    font-size: 26px;
+  }
+
+  .profile-logout {
+    width: 85%;
+    min-width: unset;
+  }
+
+  .paper-plane {
+    display: none;
+  }
+
+  .books-decoration {
+    opacity: 0.6;
+    right: 5px;
+    bottom: 10px;
+    transform: scale(0.7);
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-card {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .profile-info-row {
+    padding: 13px 12px;
+  }
+
+  .info-icon {
+    margin-right: 10px;
+  }
+
+  .info-arrow {
+    margin-left: 5px;
+  }
+
+  .profile-email {
+    font-size: 14px;
+  }
+
+  .profile-role {
+    padding: 7px 15px;
+  }
+}

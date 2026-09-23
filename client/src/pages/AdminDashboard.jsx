@@ -1,164 +1,164 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
+import { useAuth } from '../context/AuthContext';
+import { addRipple } from '../utils/ripple';
 import api from '../services/api';
-
-const STATUS_ORDER = ['draft', 'generating', 'generation_failed', 'ready', 'scheduled', 'active', 'completed'];
+import '../styles/admin-dashboard.css';
 
 const AdminDashboard = () => {
-  const [exams, setExams] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [recentExams, setRecentExams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/exams/my-exams')
-      .then(res => setExams(res.data.exams))
-      .catch(() => setError('Failed to load exams'))
-      .finally(() => setLoading(false));
+    api.get('/exams/my-exams').then(res => {
+      const exams = res.data.exams;
+      setRecentExams(exams.slice(0, 5));
+      setStats({
+        total: exams.length,
+        draft: exams.filter(e => ['draft', 'generation_failed', 'ready'].includes(e.status)).length,
+        scheduled: exams.filter(e => e.status === 'scheduled').length,
+        active: exams.filter(e => e.status === 'active').length,
+        completed: exams.filter(e => e.status === 'completed').length,
+      });
+    }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const stats = {
-    total: exams.length,
-    scheduled: exams.filter(e => e.status === 'scheduled').length,
-    active: exams.filter(e => e.status === 'active').length,
-    completed: exams.filter(e => e.status === 'completed').length,
-    draft: exams.filter(e => ['draft', 'generation_failed', 'ready'].includes(e.status)).length,
+  const timeOfDay = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
   };
 
-  const formatDate = d => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-  const formatTime = t => {
-    if (!t) return '—';
-    const [h, m] = t.split(':');
-    const hr = parseInt(h);
-    return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
-  };
+  const formatDate = d => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
 
   return (
-    <AdminLayout pageName="Dashboard">
-      {/* Page header */}
-      <div className="ap-header">
-        <div>
-          <div className="ap-title">📊 Dashboard</div>
-          <div className="ap-subtitle">Manage your examinations and monitor activity</div>
-        </div>
-        <button className="abtn abtn--primary abtn--lg" onClick={() => navigate('/admin/create-exam')}>
-          ➕ Create New Exam
-        </button>
-      </div>
+    <AdminLayout
+      pageName="Dashboard"
+      pageSubtitle={`${new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}`}
+    >
+      <div className="dash-page">
 
-      {/* Stat cards */}
-      <div className="as-grid">
-        <div className="as-card as-card--blue">
-          <div className="as-icon">📋</div>
-          <div className="as-value">{stats.total}</div>
-          <div className="as-label">Total Exams</div>
-        </div>
-        <div className="as-card as-card--amber">
-          <div className="as-icon">⏳</div>
-          <div className="as-value">{stats.draft}</div>
-          <div className="as-label">Pending Setup</div>
-        </div>
-        <div className="as-card as-card--purple">
-          <div className="as-icon">📅</div>
-          <div className="as-value">{stats.scheduled}</div>
-          <div className="as-label">Scheduled</div>
-        </div>
-        <div className="as-card as-card--green">
-          <div className="as-icon">🟢</div>
-          <div className="as-value">{stats.active}</div>
-          <div className="as-label">Live Now</div>
-        </div>
-        <div className="as-card as-card--red">
-          <div className="as-icon">✅</div>
-          <div className="as-value">{stats.completed}</div>
-          <div className="as-label">Completed</div>
-        </div>
-      </div>
-
-      {/* Exams list */}
-      <div className="a-card">
-        <div className="a-card-header">
-          <span className="a-card-title">My Examinations</span>
-          <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>{exams.length} total</span>
-        </div>
-        <div className="a-card-body" style={{ padding: '0' }}>
-          {loading && (
-            <div className="a-loading"><div className="a-spinner" /><span>Loading exams...</span></div>
-          )}
-          {error && (
-            <div style={{ padding: '20px' }}><div className="a-alert a-alert--error">{error}</div></div>
-          )}
-          {!loading && exams.length === 0 && !error && (
-            <div className="a-empty">
-              <div className="a-empty-icon">📭</div>
-              <div className="a-empty-text">No exams created yet</div>
-              <div className="a-empty-sub">Click "Create New Exam" to get started</div>
+        {/* Welcome banner */}
+        <div className="dash-welcome">
+          <div className="dash-welcome-content">
+            <div className="dash-welcome-greeting">
+              {timeOfDay()}, {user?.name?.split(' ')[0]} 👋
             </div>
-          )}
+            <div className="dash-welcome-sub">
+              Here's what's happening with your exams today.
+            </div>
+            <div className="dash-welcome-actions">
+              <button className="dash-quick-btn solid" onClick={() => navigate('/admin/create-exam')}>
+                ➕ Create Exam
+              </button>
+              <button className="dash-quick-btn outline" onClick={() => navigate('/admin/my-exams')}>
+                📋 My Exams
+              </button>
+              <button className="dash-quick-btn outline" onClick={() => navigate('/admin/live-leaderboard')}>
+                🏆 Live Leaderboard
+              </button>
+            </div>
+          </div>
+        </div>
 
-          <div className="ae-grid" style={{ padding: exams.length > 0 ? '20px' : '0' }}>
-            {exams.map(exam => (
-              <div key={exam.id} className="ae-card">
-                <div className="ae-card-header">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                    <div className="ae-card-title">{exam.title}</div>
-                    <span className={`badge badge--${exam.status}`}>{exam.status}</span>
-                  </div>
-                  <div className="ae-tags">
-                    <span className="ae-tag ae-tag--stream">{exam.stream}</span>
-                    <span className="ae-tag ae-tag--subject">{exam.subject}</span>
-                    <span className={`ae-tag ae-tag--${exam.difficulty?.toLowerCase()}`}>{exam.difficulty}</span>
-                  </div>
-                </div>
-
-                <div className="ae-card-body">
-                  <div className="ae-meta-row">
-                    <div className="ae-meta-item">❓ <strong>{exam.question_count}</strong> questions</div>
-                    <div className="ae-meta-item">🎯 <strong>{exam.total_marks}</strong> marks</div>
-                    <div className="ae-meta-item">⏱ <strong>{exam.duration_minutes}</strong> min</div>
-                    <div className="ae-meta-item">👥 <strong>{exam.capacity}</strong> capacity</div>
-                  </div>
-                  <div className="ae-meta-item" style={{ marginBottom: '10px' }}>
-                    📅 {formatDate(exam.scheduled_date)} at {formatTime(exam.start_time)}
-                  </div>
-
-                  <div className="ae-code-box">
-                    <div>
-                      <div className="ae-code-label">Exam Code</div>
-                      <div className="ae-code">{exam.exam_code}</div>
-                    </div>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Share with students</span>
-                  </div>
-                </div>
-
-                <div className="ae-card-footer">
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>ID: {exam.id}</span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {(exam.status === 'draft' || exam.status === 'generation_failed') && (
-                      <button className="abtn abtn--purple abtn--sm"
-                        onClick={() => navigate(`/admin/exam/${exam.id}/generate`)}>
-                        ✨ Generate Questions
-                      </button>
-                    )}
-                    {exam.status === 'ready' && (
-                      <button className="abtn abtn--ghost abtn--sm"
-                        onClick={() => navigate(`/admin/exam/${exam.id}/generate`)}>
-                        👁 Preview / Republish
-                      </button>
-                    )}
-                    {(exam.status === 'scheduled' || exam.status === 'active' || exam.status === 'completed') && (
-                      <button className="abtn abtn--ghost abtn--sm"
-                        onClick={() => navigate(`/admin/exam/${exam.id}/generate`)}>
-                        👁 View Questions
-                      </button>
-                    )}
-                  </div>
-                </div>
+        {/* Stats */}
+        {loading ? (
+          <div className="dash-stats">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="dash-stat" style={{ opacity: 0.5 }}>
+                <div style={{ height: 20, width: 40, background: '#e2e8f0', borderRadius: 4, marginBottom: 10 }} />
+                <div style={{ height: 36, width: 60, background: '#e2e8f0', borderRadius: 4, marginBottom: 8 }} />
+                <div style={{ height: 12, width: 80, background: '#e2e8f0', borderRadius: 4 }} />
               </div>
             ))}
           </div>
+        ) : (
+          <div className="dash-stats">
+            {[
+              { label: 'Total Exams', value: stats?.total ?? 0, icon: '📋', cls: 'blue' },
+              { label: 'Pending Setup', value: stats?.draft ?? 0, icon: '⏳', cls: 'amber' },
+              { label: 'Scheduled', value: stats?.scheduled ?? 0, icon: '📅', cls: 'purple' },
+              { label: 'Live Now', value: stats?.active ?? 0, icon: '🟢', cls: 'green' },
+              { label: 'Completed', value: stats?.completed ?? 0, icon: '✅', cls: 'red' },
+            ].map(s => (
+              <div key={s.label} className={`dash-stat ${s.cls} slide-up`}>
+                <div className="dash-stat-icon">{s.icon}</div>
+                <div className="dash-stat-value">{s.value}</div>
+                <div className="dash-stat-label">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Quick actions */}
+        <div className="dash-section-title">⚡ Quick Actions</div>
+        <div className="dash-actions-grid" style={{ marginBottom: 28 }}>
+          {[
+            { icon: '➕', label: 'Create New Exam', sub: 'Set up exam & generate questions', path: '/admin/create-exam', color: 'blue' },
+            { icon: '📋', label: 'My Exams', sub: 'View, reset and manage all exams', path: '/admin/my-exams', color: 'green' },
+            { icon: '🏆', label: 'Live Leaderboard', sub: 'Monitor students in real time', path: '/admin/live-leaderboard', color: 'purple' },
+            { icon: '📊', label: 'Exam Results', sub: 'View reports for any exam', path: '/admin/my-exams', color: 'amber' },
+          ].map(a => (
+            <div key={a.path + a.label} className="dash-action-card" onClick={() => navigate(a.path)}>
+              <div className={`dash-action-icon ${a.color}`}>{a.icon}</div>
+              <div>
+                <div className="dash-action-title">{a.label}</div>
+                <div className="dash-action-sub">{a.sub}</div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Recent exams */}
+        {recentExams.length > 0 && (
+          <>
+            <div className="dash-section-title">
+              🕐 Recent Exams
+              <span
+                style={{ fontSize: '0.78rem', color: '#3b82f6', fontWeight: 500, cursor: 'pointer', marginLeft: 'auto' }}
+                onClick={() => navigate('/admin/my-exams')}
+              >
+                View all →
+              </span>
+            </div>
+            <div className="dash-recent-list">
+              {recentExams.map(exam => (
+                <div key={exam.id} className="dash-recent-item">
+                  <div className={`dash-recent-dot ${exam.status}`} />
+                  <div className="dash-recent-info">
+                    <div className="dash-recent-title">{exam.title}</div>
+                    <div className="dash-recent-meta">
+                      {exam.subject} · {exam.topic} · {formatDate(exam.scheduled_date)}
+                    </div>
+                  </div>
+                  <div className="dash-recent-actions">
+                    {['scheduled', 'active', 'completed'].includes(exam.status) && (
+                      <button
+                        className="tbl-btn primary"
+                        onClick={() => navigate(`/admin/exam/${exam.id}/students`)}
+                      >
+                        📊 Results
+                      </button>
+                    )}
+                    {['draft', 'generation_failed', 'ready'].includes(exam.status) && (
+                      <button
+                        className="tbl-btn success"
+                        onClick={() => navigate(`/admin/exam/${exam.id}/generate`)}
+                      >
+                        ✨ Setup
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </AdminLayout>
   );

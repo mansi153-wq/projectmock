@@ -10,6 +10,7 @@ const examRoutes = require('./routes/exam.routes');
 const generateRoutes = require('./routes/generate.routes');
 const studentRoutes = require('./routes/student.routes');
 const attemptRoutes = require('./routes/attempt.routes');
+const adminRoutes = require('./routes/admin.routes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -43,6 +44,7 @@ app.use('/api/exams', examRoutes);
 app.use('/api/exams', generateRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/attempts', attemptRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use(errorHandler);
 

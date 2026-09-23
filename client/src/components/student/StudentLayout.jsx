@@ -1,59 +1,80 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import '../../styles/student.css';
 
 const NAV_ITEMS = [
-  { path: '/student/dashboard', label: '🏠 Dashboard' },
-  { path: '/student/exams', label: '📋 Available Exams' },
-  { path: '/student/results', label: '📊 My Results' },
-  { path: '/student/profile', label: '👤 Profile' },
+  { path: '/student/dashboard', icon: '🏠', label: 'Dashboard' },
+  { path: '/student/exams',     icon: '📋', label: 'Available Exams' },
+  { path: '/student/join',      icon: '🔑', label: 'Join Exam' },
+  { path: '/student/reports',   icon: '📊', label: 'My Reports' },
+  { path: '/student/results',   icon: '📁', label: 'My Results' },
+  { path: '/student/profile',   icon: '👤', label: 'Profile' },
 ];
 
 const StudentLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const handleLogout = () => { logout(); navigate('/login'); };
 
   return (
-    <div className="sl-wrapper">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div className="sl-overlay" onClick={() => setSidebarOpen(false)} />
-      )}
+    <div className="dash-wrapper">
+      <div className={`dash-overlay ${open ? 'show' : ''}`} onClick={() => setOpen(false)} />
 
-      {/* Sidebar */}
-      <aside className={`sl-sidebar ${sidebarOpen ? 'sl-sidebar--open' : ''}`}>
-        <div className="sl-brand">AI Mock Test</div>
-        <nav className="sl-nav">
-          {NAV_ITEMS.map((item) => (
+      <aside className={`dash-sidebar ${open ? 'open' : ''}`}>
+        <div className="dash-brand">
+          <div className="dash-brand-logo">
+            <div className="dash-brand-icon">🎯</div>
+            <div>
+              <div className="dash-brand-name">AI Mock Test</div>
+              <div className="dash-brand-sub">Student Portal</div>
+            </div>
+          </div>
+        </div>
+
+        <nav className="dash-nav">
+          {NAV_ITEMS.map(item => (
             <Link
               key={item.path}
               to={item.path}
-              className={`sl-nav-link ${location.pathname === item.path ? 'sl-nav-link--active' : ''}`}
-              onClick={() => setSidebarOpen(false)}
+              className={`dash-nav-link ${location.pathname === item.path ? 'active' : ''}`}
+              onClick={() => setOpen(false)}
             >
+              <span className="dash-nav-icon">{item.icon}</span>
               {item.label}
             </Link>
           ))}
         </nav>
-        <button className="sl-logout-btn" onClick={handleLogout}>🚪 Logout</button>
+
+        <div className="dash-sidebar-footer">
+          <button
+            className="btn btn-danger btn-sm"
+            style={{ width: '100%', justifyContent: 'center' }}
+            onClick={handleLogout}
+          >
+            🚪 Logout
+          </button>
+        </div>
       </aside>
 
-      {/* Main area */}
-      <div className="sl-main">
-        <header className="sl-header">
-          <button className="sl-hamburger" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
-          <span className="sl-header-title">Welcome, {user?.name}</span>
-          <span className="sl-role-badge">Student</span>
+      <div className="dash-main">
+        <header className="dash-header">
+          <div className="dash-header-left">
+            <button className="dash-hamburger" onClick={() => setOpen(!open)}>☰</button>
+          </div>
+          <div className="dash-header-right">
+            <div className="dash-user-chip">
+              <div className="dash-avatar">{user?.name?.charAt(0)?.toUpperCase()}</div>
+              <span className="dash-user-name">{user?.name}</span>
+            </div>
+            <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 700 }}>
+              STUDENT
+            </span>
+          </div>
         </header>
-        <main className="sl-content">{children}</main>
+        <main className="dash-content">{children}</main>
       </div>
     </div>
   );

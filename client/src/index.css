@@ -1,18 +1,4 @@
+/* Resets handled in global.css */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  background: #f0f4f8;
-}
-
-/* Remove the constrained #root width from the old Vite template */
-#root {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  text-align: left;
-  border: none;
-  min-height: 100vh;
-  display: block;
-}
+body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+#root { width: 100%; max-width: 100%; margin: 0; text-align: left; border: none; min-height: 100vh; display: block; }

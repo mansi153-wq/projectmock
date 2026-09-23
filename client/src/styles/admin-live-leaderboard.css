@@ -1,0 +1,205 @@
+/* ── Live Leaderboard Page ──────────────────────────── */
+
+.live-lb-page { max-width: 1100px; }
+
+/* Exam selector */
+.live-lb-selector-bar {
+  background: #fff;
+  border: 1px solid #e8edf5;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.live-lb-selector-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #374151;
+  white-space: nowrap;
+}
+.live-lb-exam-select {
+  flex: 1;
+  min-width: 200px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+.live-lb-exam-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+.live-lb-search {
+  height: 42px;
+  padding: 0 14px 0 36px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  width: 200px;
+  position: relative;
+  transition: border-color 0.18s;
+}
+.live-lb-search:focus { border-color: #3b82f6; }
+.live-lb-search-wrap { position: relative; }
+.live-lb-search-wrap .search-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+/* Live indicator */
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #dc2626;
+  position: relative;
+}
+.live-dot::after {
+  content: '';
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  background: #dc2626;
+  opacity: 0.3;
+  animation: livePulse 1.2s ease-out infinite;
+}
+@keyframes livePulse {
+  0%   { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Exam info banner */
+.live-lb-exam-banner {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: #fff;
+}
+.live-lb-exam-name { font-size: 1.1rem; font-weight: 700; }
+.live-lb-exam-meta { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+.live-lb-exam-stats { display: flex; gap: 20px; }
+.live-lb-stat { text-align: center; }
+.live-lb-stat-val { font-size: 1.4rem; font-weight: 800; color: #60a5fa; }
+.live-lb-stat-lbl { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Leaderboard table */
+.live-lb-table-wrap {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e8edf5;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.live-lb-table-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafbfc;
+}
+.live-lb-table-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; }
+.live-lb-updated { font-size: 0.75rem; color: #94a3b8; }
+
+.live-lb-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.live-lb-table th {
+  padding: 11px 18px;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #e8edf5;
+}
+.live-lb-table td {
+  padding: 13px 18px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f8fafc;
+  vertical-align: middle;
+  transition: background 0.2s;
+}
+.live-lb-table tr:last-child td { border-bottom: none; }
+.live-lb-table tr.new-entry td { animation: rowFlash 1.5s ease; }
+@keyframes rowFlash {
+  0%, 100% { background: transparent; }
+  30%       { background: #eff6ff; }
+}
+
+/* Rank rows */
+.live-lb-table tr.rank-1 td { background: #fffbeb; }
+.live-lb-table tr.rank-2 td { background: #f9fafb; }
+.live-lb-table tr.rank-3 td { background: #fff7ed; }
+
+.rank-cell { font-size: 1.2rem; min-width: 40px; }
+.score-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.score-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 60px;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  transition: width 0.6s ease;
+}
+.score-bar-fill.green { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.score-pct { font-size: 0.82rem; font-weight: 700; color: #374151; min-width: 40px; text-align: right; }
+
+/* No exam selected */
+.live-lb-empty {
+  text-align: center;
+  padding: 80px 24px;
+  color: #94a3b8;
+}
+.live-lb-empty-icon  { font-size: 4rem; margin-bottom: 16px; }
+.live-lb-empty-title { font-size: 1.1rem; font-weight: 600; color: #64748b; margin-bottom: 8px; }
+.live-lb-empty-sub   { font-size: 0.875rem; }
+
+@media (max-width: 768px) {
+  .live-lb-selector-bar { flex-direction: column; align-items: flex-start; }
+  .live-lb-exam-select { min-width: 100%; }
+  .live-lb-table-wrap { overflow-x: auto; }
+}

@@ -97,3 +97,4 @@ const getStats = async (req, res) => {
 };
 
 module.exports = { getAvailableExams, getExamDetails, getMyResults, getStats };
+
