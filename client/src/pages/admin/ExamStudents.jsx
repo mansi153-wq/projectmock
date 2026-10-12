@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
+import '../../styles/admin-report.css';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -15,7 +16,7 @@ const ExamStudents = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [liveUpdate, setLiveUpdate] = useState(false);
-  const [activeTab, setActiveTab] = useState('students'); // 'students' | 'leaderboard'
+  const [activeTab, setActiveTab] = useState('students');
   const socketRef = useRef(null);
 
   const loadData = () => {
@@ -32,7 +33,6 @@ const ExamStudents = () => {
 
   useEffect(() => { loadData(); }, [examId]);
 
-  // Socket.IO for live leaderboard
   useEffect(() => {
     socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', { withCredentials: true });
     socketRef.current.emit('join:exam', Number(examId));
@@ -40,7 +40,6 @@ const ExamStudents = () => {
       if (String(data.examId) === String(examId)) {
         setLeaderboard(data.leaderboard);
         setLiveUpdate(true);
-        // Also refresh student list to get updated ranks/status
         api.get(`/admin/exams/${examId}/students`)
           .then(res => setStudents(res.data.students))
           .catch(() => {});
@@ -54,179 +53,232 @@ const ExamStudents = () => {
   const avgPct = submitted.length > 0
     ? Math.round(submitted.reduce((sum, s) => sum + (s.percentage || 0), 0) / submitted.length)
     : 0;
+  const topScore = submitted.length > 0
+    ? Math.max(...submitted.map(s => s.score || 0))
+    : 0;
 
-  const formatDate = (d) => d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+  const formatDate = (d) => d
+    ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+    : '—';
 
-  const tabStyle = (tab) => ({
-    padding: '10px 20px', border: 'none', cursor: 'pointer',
-    fontWeight: 600, fontSize: '0.88rem',
-    borderBottom: activeTab === tab ? '3px solid #2563eb' : '3px solid transparent',
-    color: activeTab === tab ? '#2563eb' : '#64748b',
-    background: 'transparent', transition: 'all 0.2s',
-  });
+  const formatTime = (d) => d
+    ? new Date(d).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    : '—';
 
   return (
     <AdminLayout pageName="Exam Results">
-      <div className="ap-header">
-        <div>
-          <div className="ap-title">📊 Exam Results — {exam?.title}</div>
-          <div className="ap-subtitle">{exam?.subject} · {exam?.topic} · {exam?.difficulty}</div>
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {liveUpdate && <span className="badge badge--active">🔴 LIVE</span>}
-          <button className="abtn abtn--ghost" onClick={() => navigate('/admin/dashboard')}>← Dashboard</button>
-        </div>
-      </div>
+      <div className="es-page">
 
-      {/* Summary stats */}
-      {!loading && (
-        <div className="as-grid" style={{ marginBottom: '20px' }}>
-          <div className="as-card as-card--blue">
-            <div className="as-icon">👥</div>
-            <div className="as-value">{students.length}</div>
-            <div className="as-label">Total Joined</div>
+        {/* ── Banner ── */}
+        <div className="es-banner slide-up">
+          <div>
+            <div className="es-banner-title">📊 {exam?.title || 'Exam Results'}</div>
+            <div className="es-banner-sub">
+              {exam?.subject} · {exam?.topic} · {exam?.difficulty} · {exam?.question_count} questions · {exam?.total_marks} marks
+            </div>
           </div>
-          <div className="as-card as-card--green">
-            <div className="as-icon">✅</div>
-            <div className="as-value">{submitted.length}</div>
-            <div className="as-label">Submitted</div>
-          </div>
-          <div className="as-card as-card--amber">
-            <div className="as-icon">📊</div>
-            <div className="as-value">{avgPct}%</div>
-            <div className="as-label">Avg Score</div>
-          </div>
-          <div className="as-card as-card--purple">
-            <div className="as-icon">🏆</div>
-            <div className="as-value">{leaderboard.length}</div>
-            <div className="as-label">On Leaderboard</div>
-          </div>
-          <div className="as-card as-card--red">
-            <div className="as-icon">🎯</div>
-            <div className="as-value">{exam?.total_marks}</div>
-            <div className="as-label">Total Marks</div>
-          </div>
-        </div>
-      )}
-
-      {loading && <div className="a-loading"><div className="a-spinner" /></div>}
-      {error && <div className="a-alert a-alert--error">{error}</div>}
-
-      {/* Tabs */}
-      <div className="a-card">
-        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '0 8px' }}>
-          <button style={tabStyle('students')} onClick={() => setActiveTab('students')}>
-            👥 Students ({students.length})
-          </button>
-          <button style={tabStyle('leaderboard')} onClick={() => setActiveTab('leaderboard')}>
-            🏆 Live Leaderboard ({leaderboard.length})
-          </button>
-        </div>
-
-        {/* Students tab */}
-        {activeTab === 'students' && (
-          <>
-            {students.length === 0 && !loading ? (
-              <div className="a-empty">
-                <div className="a-empty-icon">📭</div>
-                <div className="a-empty-text">No students have joined yet</div>
-              </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: '#f8fafc' }}>
-                      {['Rank', 'Student', 'Email', 'Score', '%', 'Started', 'Submitted', 'Status', 'Actions'].map(h => (
-                        <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.78rem', color: '#475569', fontWeight: 700, borderBottom: '1px solid #e2e8f0' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map(s => (
-                      <tr key={s.attempt_id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '12px 16px' }}>{s.rank_position ? `#${s.rank_position}` : '—'}</td>
-                        <td style={{ padding: '12px 16px', fontWeight: 600 }}>{s.name}</td>
-                        <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.82rem' }}>{s.email}</td>
-                        <td style={{ padding: '12px 16px' }}>{s.score} / {s.total_marks}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span style={{ fontWeight: 700, color: (s.percentage || 0) >= 60 ? '#16a34a' : '#dc2626' }}>
-                            {s.percentage ?? '—'}%
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '0.82rem', color: '#64748b' }}>{formatDate(s.started_at)}</td>
-                        <td style={{ padding: '12px 16px', fontSize: '0.82rem', color: '#64748b' }}>{formatDate(s.submitted_at)}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span className={`badge badge--${['submitted', 'auto_submitted'].includes(s.status) ? 'completed' : 'scheduled'}`}>
-                            {s.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px' }}>
-                          {['submitted', 'auto_submitted'].includes(s.status) && (
-                            <button className="abtn abtn--primary abtn--sm"
-                              onClick={() => navigate(`/admin/report/${s.attempt_id}`)}>
-                              📄 Report
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <div className="es-banner-right">
+            {liveUpdate && (
+              <div className="es-live-badge">
+                <div className="es-live-dot" />
+                LIVE UPDATE
               </div>
             )}
-          </>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/dashboard')}>
+              ← Dashboard
+            </button>
+          </div>
+        </div>
+
+        {/* ── Stats ── */}
+        {!loading && (
+          <div className="es-stats">
+            {[
+              { icon: '👥', val: students.length,   label: 'Total Joined',    cls: 'es-stat--blue'   },
+              { icon: '✅', val: submitted.length,   label: 'Submitted',       cls: 'es-stat--green'  },
+              { icon: '⏳', val: students.length - submitted.length, label: 'In Progress', cls: 'es-stat--amber' },
+              { icon: '📊', val: `${avgPct}%`,       label: 'Avg Score',       cls: 'es-stat--purple' },
+              { icon: '🏆', val: topScore,            label: 'Top Score',       cls: 'es-stat--red'    },
+            ].map((s, i) => (
+              <div key={s.label} className={`es-stat ${s.cls} slide-up stagger-${i + 1}`}>
+                <div className="es-stat-icon">{s.icon}</div>
+                <div className="es-stat-value">{s.val}</div>
+                <div className="es-stat-label">{s.label}</div>
+              </div>
+            ))}
+          </div>
         )}
 
-        {/* Live Leaderboard tab */}
-        {activeTab === 'leaderboard' && (
-          <>
-            {leaderboard.length === 0 ? (
-              <div className="a-empty">
-                <div className="a-empty-icon">🏆</div>
-                <div className="a-empty-text">No submissions yet</div>
-                <div className="a-empty-sub">Leaderboard will update live as students submit</div>
-              </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: '#0f172a' }}>
-                      {['Rank', 'Student', 'Email', 'Score', 'Percentage', 'Submitted', 'Report'].map(h => (
-                        <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700 }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leaderboard.map((row) => (
-                      <tr key={row.attempt_id} style={{ borderBottom: '1px solid #f1f5f9', background: row.rank_position === 1 ? '#fffbeb' : row.rank_position === 2 ? '#f8fafc' : '#fff' }}>
-                        <td style={{ padding: '12px 16px', fontSize: '1.1rem' }}>
-                          {row.rank_position <= 3 ? MEDALS[row.rank_position - 1] : `#${row.rank_position}`}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 700 }}>{row.name}</td>
-                        <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.82rem' }}>{row.email}</td>
-                        <td style={{ padding: '12px 16px' }}><strong>{row.score}</strong> / {row.total_marks}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span style={{ fontWeight: 700, fontSize: '1rem', color: row.percentage >= 60 ? '#16a34a' : '#dc2626' }}>
-                            {row.percentage}%
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '0.82rem', color: '#64748b' }}>
-                          {row.submitted_at ? new Date(row.submitted_at).toLocaleTimeString('en-IN') : '—'}
-                        </td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <button className="abtn abtn--primary abtn--sm"
-                            onClick={() => navigate(`/admin/report/${row.attempt_id}`)}>
-                            📄 Report
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        {loading && <div className="loading-page"><div className="spinner" /></div>}
+        {error && <div className="alert alert-error">{error}</div>}
+
+        {/* ── Tabs ── */}
+        {!loading && (
+          <div className="es-tabs-wrap slide-up stagger-2">
+            {/* Tab Bar */}
+            <div className="es-tab-bar">
+              <button
+                className={`es-tab-btn ${activeTab === 'students' ? 'active' : ''}`}
+                onClick={() => setActiveTab('students')}
+              >
+                👥 Students
+                <span className="es-tab-badge">{students.length}</span>
+              </button>
+              <button
+                className={`es-tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
+                onClick={() => setActiveTab('leaderboard')}
+              >
+                🏆 Live Leaderboard
+                <span className="es-tab-badge">{leaderboard.length}</span>
+              </button>
+            </div>
+
+            {/* ── Students Tab ── */}
+            {activeTab === 'students' && (
+              <>
+                {students.length === 0 ? (
+                  <div className="es-empty">
+                    <div className="es-empty-icon">📭</div>
+                    <div className="es-empty-title">No students have joined yet</div>
+                    <div className="es-empty-sub">Students will appear here once they join using the exam code</div>
+                  </div>
+                ) : (
+                  <div className="es-table-wrap">
+                    <table className="es-table">
+                      <thead>
+                        <tr>
+                          {['Rank', 'Student', 'Email', 'Score', 'Performance', 'Started', 'Submitted', 'Status', 'Actions'].map(h => (
+                            <th key={h}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map(s => {
+                          const pct = s.percentage ?? 0;
+                          const isSubmitted = ['submitted', 'auto_submitted'].includes(s.status);
+                          return (
+                            <tr key={s.attempt_id}>
+                              <td>
+                                <span className="es-rank">
+                                  {s.rank_position ? `#${s.rank_position}` : '—'}
+                                </span>
+                              </td>
+                              <td style={{ fontWeight: 600, color: '#0f172a' }}>{s.name}</td>
+                              <td style={{ color: '#64748b', fontSize: '0.8rem' }}>{s.email}</td>
+                              <td>
+                                <strong>{isSubmitted ? s.score : '—'}</strong>
+                                {isSubmitted && <span style={{ color: '#94a3b8' }}> / {s.total_marks}</span>}
+                              </td>
+                              <td>
+                                {isSubmitted ? (
+                                  <div className="es-score-bar-wrap">
+                                    <div className="es-score-bar-bg">
+                                      <div
+                                        className={`es-score-bar-fill ${pct >= 60 ? 'good' : ''}`}
+                                        style={{ width: `${pct}%` }}
+                                      />
+                                    </div>
+                                    <span className="es-score-pct">{pct}%</span>
+                                  </div>
+                                ) : <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>—</span>}
+                              </td>
+                              <td style={{ color: '#64748b', fontSize: '0.8rem' }}>{formatDate(s.started_at)}</td>
+                              <td style={{ color: '#64748b', fontSize: '0.8rem' }}>{formatDate(s.submitted_at)}</td>
+                              <td>
+                                <span className={`es-badge ${s.status}`}>
+                                  {s.status.replace('_', ' ')}
+                                </span>
+                              </td>
+                              <td>
+                                {isSubmitted && (
+                                  <button
+                                    className="es-report-btn"
+                                    onClick={() => navigate(`/admin/report/${s.attempt_id}`)}
+                                  >
+                                    📄 Report
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
             )}
-          </>
+
+            {/* ── Live Leaderboard Tab ── */}
+            {activeTab === 'leaderboard' && (
+              <>
+                {leaderboard.length === 0 ? (
+                  <div className="es-empty">
+                    <div className="es-empty-icon">🏆</div>
+                    <div className="es-empty-title">No submissions yet</div>
+                    <div className="es-empty-sub">Leaderboard updates live as students submit their answers</div>
+                  </div>
+                ) : (
+                  <div className="es-table-wrap">
+                    <table className="es-table lb">
+                      <thead>
+                        <tr>
+                          {['Rank', 'Student', 'Email', 'Score', 'Performance', 'Submitted', 'Actions'].map(h => (
+                            <th key={h}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leaderboard.map((row) => {
+                          const pct = row.percentage ?? Math.round((row.score / row.total_marks) * 100);
+                          const rankClass = row.rank_position === 1 ? 'rank-1' : row.rank_position === 2 ? 'rank-2' : row.rank_position === 3 ? 'rank-3' : '';
+                          return (
+                            <tr key={row.attempt_id} className={rankClass}>
+                              <td>
+                                <span className={`es-rank ${row.rank_position <= 3 ? 'medal' : ''}`}>
+                                  {row.rank_position <= 3 ? MEDALS[row.rank_position - 1] : `#${row.rank_position}`}
+                                </span>
+                              </td>
+                              <td style={{ fontWeight: 700, color: '#0f172a' }}>{row.name}</td>
+                              <td style={{ color: '#64748b', fontSize: '0.8rem' }}>{row.email}</td>
+                              <td>
+                                <strong>{row.score}</strong>
+                                <span style={{ color: '#94a3b8' }}> / {row.total_marks}</span>
+                              </td>
+                              <td>
+                                <div className="es-score-bar-wrap">
+                                  <div className="es-score-bar-bg">
+                                    <div
+                                      className={`es-score-bar-fill ${pct >= 60 ? 'good' : ''}`}
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                  </div>
+                                  <span className="es-score-pct">{pct}%</span>
+                                </div>
+                              </td>
+                              <td style={{ color: '#64748b', fontSize: '0.8rem' }}>
+                                {formatTime(row.submitted_at)}
+                              </td>
+                              <td>
+                                <button
+                                  className="es-report-btn"
+                                  onClick={() => navigate(`/admin/report/${row.attempt_id}`)}
+                                >
+                                  📄 Report
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         )}
+
       </div>
     </AdminLayout>
   );
